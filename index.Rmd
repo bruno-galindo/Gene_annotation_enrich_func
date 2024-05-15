@@ -184,8 +184,11 @@ plot_qtl_info(out.qtls, qtl_plot = "qtl_name", qtl_class="Reproduction")
 
 # Enrichment analysis
 
-Now we have our genes and QTLs surrounding our significant SNPs. We can check for the presence of this genes in GO terms, and test the significance of this "presence".
+Now we have our genes and QTLs surrounding our significant SNPs. We can check for the presence of this genes in specific terms, and test the significance of this "presence".
 
+**ps.** from now every time I use the word **term** could be a GO term (GO: Molecular Function, GO: Cellular Component, GO: Biological Process), KEGG Pathway, REACTOME Pathway and other terms.
+
+# stop may 15th
 
 ## Gene enrichment using GPROFILER
 Imagine we have the scenario below:
@@ -222,12 +225,88 @@ In the case of FDR we will correct the p-values for the number of tests, and as 
 
 ## QTL Enrichment using GALLO
 
-The theory behind the QTL enrichment analysis is pretty much the same that the Gene Enrichment, but instead of testing for presence in a GO term we are going to test for "QTL Class" look the scenario bellow, we tried to correlate the image with the QTL enrichmen output from GALLO.
+The theory behind the QTL enrichment analysis is pretty much the same that the Gene Enrichment, but instead of testing for presence in a **GO term** we are going to test for a **specific trait**, look the scenario bellow, we tried to correlate the image with the QTL enrichment output from GALLO.
 
 <img src="image21.png" alt="My Image" style="display: block; margin-left: auto; margin-right: auto;">
 
-P = \( \frac{{\binom{4}{3} \cdot \binom{13}{1}}}{{\binom{18}{5}}} \)
+<ul>
+<li>The <span style="color:red">**red circle**</span> is trait that is being tested for QTL enrichment
+<li>The <span style="color:blue">**blue circle**</span> is the chromossome we are considering our "population", but could also be for the whole genome and not for chromosome
+<li>The <span style="color:green">**green arrow**</span> shows the total number of QTL in chromosome 2 surrounding our significant SNP markers, this represent our sample size or **n**
+<li>The **black arrow** show the total # of QTLs in chromosome 2 surrounding our significant SNP markers associated with a specific trait, i.e out of the **n** how many are associated to a specific trait and it is the **nt** value.
+<li>The <span style="color:purple">**purple arrow**</span> show the total number of QTL in our population (chromossome or genome), this represents the **m** value
+<li>The <span style="color:red">**red arrow**</span> show the total of QTLs in chromosome 2 associated with a specific trait, i.e out of the **m** how many are associated to a specific trait and it is the **mt** value.
+</ul>
 
+The probability formula is:
+
+\[ P = \frac{{\binom{mt}{nt} \cdot \binom{m-mt}{n-nt}}}{{\binom{m}{n}}} \]
+
+Using our example:
+
+\[ P = \frac{{\binom{27}{2} \cdot \binom{2967}{350}}}{{\binom{2994}{352}}} \]
+
+```{r eval=FALSE}
+chr_ann <- 27
+sample_ann <- 2
+chr_qtl <- 2994
+sample_qtl <- 352
+log_numerator <- lchoose(chr_ann, sample_ann) + lchoose((chr_qtl - chr_ann), (sample_qtl - sample_ann))
+log_denominator <- lchoose(chr_qtl, sample_qtl)
+log_P <- log_numerator - log_denominator
+P <- exp(log_P)
+```
+
+But to estimate the **p-value** you need to sum up all probabilities equal or rarer, in other words I need to calculate the probabilities in the same way that in the previour formula for all situations bellow and then sum up:
+
+
+> 2 QTLs out of 27 QTLs (**my sample**)  
+> 3 QTLs out of 27 QTLs  
+> 4 QTLs out of 27 QTLs  
+> 5 QTLs out of 27 QTLs  
+>.  
+>.  
+>.  
+> 27 QTLs out of 27 QTLs  
+
+
+\[ P = \sum_{i=2}^{27} \frac{{\binom{mt}{nt_i} \cdot \binom{m-mt}{n-nt}}}{{\binom{m}{n}}} \]
+
+
+The output of the formula above will be the p-value and can also be calculated in **r** using the code below.
+
+
+```{r eval=FALSE}
+chr_ann <- 27 # These are the the QTLs for a specific trait annotated in a specific chromosome (mt)
+chr_qtl <- 2994 # These are ALL QTLs (regardless the trait) annotated for a specific chromosome (Population size = m)
+sample_qtl <- 352 # These are the SAMPLE QTLs (regardless the trait) annotated for your sample at a specific chromosome (Sample size = n)
+log_denominator <- lchoose(chr_qtl, sample_qtl)
+
+# Initialize a vector to store the results
+probabilities <- numeric(26)  # We'll have 26 new combinations from 2 to 27
+
+# Loop through different sample sizes from 2 to 27 --> these are the QTLs for a specific trait annotated in a specific chromosome for my SAMPLE (nt)
+for (sample_ann in 2:27) {
+  # Calculate the logarithm of the numerator
+  log_numerator <- lchoose(chr_ann, sample_ann) + lchoose((chr_qtl - chr_ann), (sample_qtl - sample_ann))
+  
+  # Calculate the logarithm of P
+  log_P <- log_numerator - log_denominator
+  
+  # Calculate P
+  P <- exp(log_P)
+  
+  # Store the result
+  probabilities[sample_ann - 1] <- P
+}
+
+# Print the probabilities
+print(probabilities)
+
+# Calculate the sum of probabilities
+total_probability <- sum(probabilities)
+total_probability
+```
 
 ## QTL enrichment 
 
