@@ -182,12 +182,12 @@ plot_qtl_info(out.qtls, qtl_plot = "qtl_name", qtl_class="Reproduction")
 
 
 
-
-
 # Enrichment analysis
 
 Now we have our genes and QTLs surrounding our significant SNPs. We can check for the presence of this genes in GO terms, and test the significance of this "presence".
 
+
+## Gene enrichment using GPROFILER
 Imagine we have the scenario below:
 
 <img src="image15.png" alt="My Image" style="display: block; margin-left: auto; margin-right: auto;">
@@ -220,7 +220,13 @@ To control false positive in situations of multiple testing we can use for examp
 
 In the case of FDR we will correct the p-values for the number of tests, and as consequence usualy we are going to "increase" the p-value, so after this the terms that remain positive we can consider for our next steps as significant enriched terms.
 
-# QTL Enrichment
+## QTL Enrichment using GALLO
+
+The theory behind the QTL enrichment analysis is pretty much the same that the Gene Enrichment, but instead of testing for presence in a GO term we are going to test for "QTL Class" look the scenario bellow, we tried to correlate the image with the QTL enrichmen output from GALLO.
+
+<img src="image21.png" alt="My Image" style="display: block; margin-left: auto; margin-right: auto;">
+
+P = \( \frac{{\binom{4}{3} \cdot \binom{13}{1}}}{{\binom{18}{5}}} \)
 
 
 ## QTL enrichment 
