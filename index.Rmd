@@ -1,7 +1,7 @@
 ---
 title: "Annotation_Enrichment_Functional"
 author: "Galindo, B. A"
-date: "2024-05-01"
+date: "Version: 05-16-2024"
 output:
   html_document:
     toc: true
@@ -10,6 +10,12 @@ output:
 bibliography: My Library.bib
 ---
 
+# Contact information
+Bruno A. Galindo  
+<bambrozi@uoguelph.ca>  
+<bruno@uenp.edu.br>  
+
+# Introduction
 
 After finish you GWAS analysis you get a list with significant associations between a marker (SNP) and your trait (phenotype), this list with from this list you will need 3 columns for the following analyzes, the **SNP name**, the **chromosome** and **position** of your markers.
 
