@@ -2,12 +2,24 @@
 title: "Annotation_Enrichment_Functional"
 author: "Galindo, B. A"
 date: "2024-05-01"
-output: html_document
+output:
+  html_document:
+    toc: true
+  pdf_document:
+    toc: true
+bibliography: My Library.bib
 ---
 
 
+After finish you GWAS analysis you get a list with significant associations between a marker (SNP) and your trait (phenotype), this list with from this list you will need 3 columns for the following analyzes, the **SNP name**, the **chromosome** and **position** of your markers.
 
-# VARIANT EFFECT PREDICTOR (VEP) <https://www.ensembl.org/Homo_sapiens/Tools/VEP>
+In the image below you can find a summary of Steps, input and output information.
+
+<img src="image26.png" alt="My Image" style="display: block; margin-left: auto; margin-right: auto;">
+
+
+# VARIANT EFFECT PREDICTOR (VEP) 
+<https://www.ensembl.org/Homo_sapiens/Tools/VEP>
 
 After perform the GWAS analysis we got as output a list of **significan SNPs** that are associated with our trait.
 
@@ -37,22 +49,28 @@ Now you have your <span style="background-color: #00FF00;">rsID</span> and you c
 
 <img src="image13.png" alt="My Image" style="display: block; margin-left: auto; margin-right: auto;">
 
+
 ## Running VEP
 
-You can find the VEP in the website <https://www.ensembl.org/Homo_sapiens/Tools/VEP>
+You can find the VEP in the website <https://mart.ensembl.org/info/docs/tools/vep/index.html>
 
-<img src="image20.png" alt="My Image" style="display: block; margin-left: auto; margin-right: auto;">
+<img src="image23.png" alt="My Image" style="display: block; margin-left: auto; margin-right: auto;">  
 
+<img src="image24.png" alt="My Image" style="display: block; margin-left: auto; margin-right: auto;">  
+
+<img src="image25.png" alt="My Image" style="display: block; margin-left: auto; margin-right: auto;">  
 
 # GALLO
 
-To perform gene annotation we are gonna use the package GALLO
+Now that you have some insights about the location and consequences of your variants we can move forward and discover which genes and QTL are surrounding our significant SNPs. This step we are going to perform using GALLO package.
 
-To use GALLO you need three different imput file:
+Many informations from GALLO you can find on [@fonseca_rpubs_2020]
+
+To use GALLO you need three different input files:
 <ul>
-<li> GWAS output
-<li> QTL position 
-<li> GENE postion
+<li> GWAS output (significant SNPs)
+<li> QTL position: a file that contains the position of known QTL on your reference genome. 
+<li> GENE postion: a file that contains the position of known GENES on your reference genome. 
 </il>
 
 
@@ -107,7 +125,7 @@ Than you are gonna run the function **find_genes_qtls_around_markers** setting u
 You also need to choose the proper **interval** that is the range that GALLO will check upstream and downstream of you SNP position.
 
 ```{r eval=FALSE}
-
+#GALLO
 #import a QTL annotation file
 qtl_dbb <- import_gff_gtf(db_file="/Animal_QTLdb_release52_goatCHIR_ARS1.gff.gz",file_type="gff")
 
@@ -159,14 +177,17 @@ Now, as output you have two files with the Genes and QTL surrounding your SNP in
 **QTL**
 <img src="image10.png" alt="My Image" style="display: block; margin-left: auto; margin-right: auto;">
 
+
 ## QTL summary
+
+GALLO have some tools to summarize our QTL data, the first two are charts that give us the proportion of QTL by class for instance.
 
 ### Pie chart
 
-With this function you are gonna plot the percentage of each QTL class annoatted
+With this function you are gonna plot the percentage of each QTL class annotated
 
 ```{r eval=FALSE}
-
+#GALLO
 par(mar=c(1,30,1,1))
 plot_qtl_info(out.qtls, qtl_plot = "qtl_type", cex=2)
 
@@ -175,7 +196,7 @@ plot_qtl_info(out.qtls, qtl_plot = "qtl_type", cex=2)
 ### Bar chart
 plotting the percentage of each trait annoatted for a determined class of QTL, for instance *Reproduction QTL*
 ```{r eval=FALSE}
-
+#GALLO
 par(mar=c(5,20,1,1))
 plot_qtl_info(out.qtls, qtl_plot = "qtl_name", qtl_class="Reproduction")
 ```
@@ -184,34 +205,44 @@ plot_qtl_info(out.qtls, qtl_plot = "qtl_name", qtl_class="Reproduction")
 
 # Enrichment analysis
 
+This section is based in [@dessimoz_gene_2017]
+
 Now we have our genes and QTLs surrounding our significant SNPs. We can check for the presence of this genes in specific terms, and test the significance of this "presence".
 
 **ps.** from now every time I use the word **term** could be a GO term (GO: Molecular Function, GO: Cellular Component, GO: Biological Process), KEGG Pathway, REACTOME Pathway and other terms.
 
-# stop may 15th
 
 ## Gene enrichment using GPROFILER
 Imagine we have the scenario below:
 
 <img src="image15.png" alt="My Image" style="display: block; margin-left: auto; margin-right: auto;">
 
-In simple terms we want to know if we have a bigger proportion of annotated genes to a specific term in our sample than in the whole population (chromosome or genome). For instance, is the propotion of genes present in the pathway grater in our sample than in the genome/chromosome? Our H0 is what I observed in my sample is what we would expect just by chance.
+In simple terms we want to know if we have a bigger proportion of annotated genes to a specific term in our sample than in the whole population (chromosome or genome). For instance, is the proportion of genes present in the pathway grater in our sample than in the genome/chromosome? Our H_0 is what I observed in my sample, is this what we would expect just by chance?
 
 To estimate the probability of this scenario we can use the following formula.
 
 <img src="image16.png" alt="My Image" style="display: block; margin-left: auto; margin-right: auto;">
+(Source: [@dessimoz_gene_2017])
 
 With this formula I'll calculate the probability of our scenario.
 
-But we need to check if its significance and to do this we can estimate a p-value that consist in adding two probabilities under the assumption that the null hypothesis is true:
+But we need to check its significance and to do this we can estimate a p-value that consist in adding two probabilities under the assumption that the null hypothesis is true:
 1) a scenario as extreme as our
 2) scenarios more extreme than, the one actually observed.
 
 <img src="image19.png" alt="My Image" style="display: block; margin-left: auto; margin-right: auto;">
+(Modified from: [@dessimoz_gene_2017])
 
 In our example we found that we have 0.044 (less than 0.05 or 5%) that our scenario or more extreme scenarios happen just by chance. so we reject H0. 
 
 So we can say that our term (pathway or GO term) is enriched (more frequent / present) in our sample than in the whole genome/chromosome.
+
+For more detailed explanation about p-value calculation you can watch the videos below:  
+
+<https://youtu.be/JQc3yx0-Q9E?si=UPeDf8rAG-4u1SSA>
+
+<https://youtu.be/udyAvvaMjfM?si=mY7VQLW3BbJaWFgx>
+
 
 ## Multiple testing control
 
@@ -222,6 +253,8 @@ Another way to interpret p-value is the number of false positive we "accept", fo
 To control false positive in situations of multiple testing we can use for example: Bonferroni or FDR.
 
 In the case of FDR we will correct the p-values for the number of tests, and as consequence usualy we are going to "increase" the p-value, so after this the terms that remain positive we can consider for our next steps as significant enriched terms.
+
+You can find extra information about FDR in this youtube video <https://youtu.be/K8LQSvtjcEo?si=rEc6bRkOt0luJhiW>
 
 ## QTL Enrichment using GALLO
 
@@ -247,6 +280,7 @@ Using our example:
 \[ P = \frac{{\binom{27}{2} \cdot \binom{2967}{350}}}{{\binom{2994}{352}}} \]
 
 ```{r eval=FALSE}
+#R Example
 chr_ann <- 27
 sample_ann <- 2
 chr_qtl <- 2994
@@ -277,6 +311,7 @@ The output of the formula above will be the p-value and can also be calculated i
 
 
 ```{r eval=FALSE}
+#R example
 chr_ann <- 27 # These are the the QTLs for a specific trait annotated in a specific chromosome (mt)
 chr_qtl <- 2994 # These are ALL QTLs (regardless the trait) annotated for a specific chromosome (Population size = m)
 sample_qtl <- 352 # These are the SAMPLE QTLs (regardless the trait) annotated for your sample at a specific chromosome (Sample size = n)
@@ -322,10 +357,8 @@ You need to set up different parameter to check the p-value for each QTL
 </ul>
 
 ```{r eval=FALSE}
+#GALLO
 #QTL enrichment analysis 
-
-
-
 out.enrich<-qtl_enrich(qtl_db= qtl_dbb, 
                        qtl_file= out.qtl, qtl_type = "Name",
                        enrich_type = "chromosome", chr.subset = NULL, 
@@ -360,16 +393,19 @@ Before plot the enrichment results, a new ID column will be created in order to 
 
 Creating a new ID composed by the trait and the chromosome
 ```{r eval=FALSE}
+#GALLO
 out.enrich$ID<-paste(out.enrich$QTL," - ","CHR",out.enrich$CHR,sep="")
 ```
 
 Match the QTL classes and filtering the Reproduction related QTLs
 ```{r eval=FALSE}
+#GALLO
 out.enrich.filtered<-out.enrich[which(out.enrich$adj.pval<0.05),]
 ```
 
 Plotting the enrichment results for the QTL enrichment analysis
 ```{r eval=FALSE}
+#GALLO
 QTLenrich_plot(out.enrich.filtered, x="ID", pval="adj.pval")
 ```
 
@@ -456,23 +492,11 @@ publish_gosttable(
 
 
 
-
-# GENE ONTOLOGY
-
-## amiGO / Panther
-
-<https://amigo.geneontology.org/amigo>
-
-# METABOLIC PATHWAYS
-
-## REACTOME <https://reactome.org/>
-
-## DAVID
-
 # GENE NETWORKS
 
-## STRING <https://string-db.org/>
+## STRING 
+<https://string-db.org/>
 
-## NETWORK ANALYST <https://www.networkanalyst.ca/>
 
+# Reference list
 
