@@ -50,7 +50,9 @@ Now you have your <span style="background-color: #00FF00;">rsID</span> and you c
 <img src="image13.png" alt="My Image" style="display: block; margin-left: auto; margin-right: auto;">
 
 
-## Running VEP
+## Running VEP 
+
+<span style="color:red">**This session is still under construction!**</span>
 
 You can find the VEP in the website <https://mart.ensembl.org/info/docs/tools/vep/index.html>
 
@@ -496,7 +498,7 @@ publish_gosttable(
 
 ## STRING 
 <https://string-db.org/>
-
+<span style="color:red">**This session is still under construction!**</span>
 
 # Reference list
 
